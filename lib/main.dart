@@ -1,100 +1,95 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/services.dart';
-// import 'dart:math';
-// import 'package:newflutterapp/DropdownButton.dart';
 
 void main() {
   runApp(MyApp());
 }
 
+
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Hide the debug banner
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primaryColor: Colors.red),
-      title: 'Read Json',
-      home: HomePage(),
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
+class MyHomePage extends StatefulWidget {
+  MyHomePage({Key? key, required this.title}) : super(key: key);
+  final String title;
+
   @override
-  _HomePageState createState() => _HomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+
+
+class _MyHomePageState extends State<MyHomePage> {
   
-  List _items = [];
+  static List student=[];
   int? sortColumnIndex = 0;
   bool isAscending = true ;
-  // DataTableSource _data = MyData();
-
-  // Fetch content from the json file
-  Future<void> readJson() async {
-    final String response = await rootBundle.loadString('../assets/StudentJson.json');
-    final data = await json.decode(response);
-    setState(() {
-      _items = data["Full"];
-    });
-    //  print(_items);
+  Future<String>_loadAStudentAsset() async{
+  return await rootBundle.loadString('../assets/StudentJson.json');
   }
 
+  Future loadStudent() async {
+    final String jsonString = await _loadAStudentAsset();
+    final jsonResponse = json.decode(jsonString);
+      setState(() {
+        student = jsonResponse["Full"];
+        // print(student); 
+      });
+    }
+  
   @override
     void initState() {
       super.initState();
-      readJson();
-      
+      loadStudent();
     }
-
+  @override
   Widget build(BuildContext context) {
-
-    
     return Scaffold(
-        // appBar: AppBar(
-        //   centerTitle: true,
-        //   title: Text(
-        //     'Read Json',
-        //   ),
-          
-        // ),
-      backgroundColor: Colors.white30,
-      body: SingleChildScrollView(
+      body:  SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child:Center(
         child:SingleChildScrollView(
         scrollDirection: Axis.vertical,
-        
-        child: Padding(
-        padding: const EdgeInsets.all(5),
-        
         child: Column(
           mainAxisAlignment:MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
-          
            children: [
             Text(
               'Student Table',
               style: TextStyle(color: Colors.red,fontSize: 40.0,fontWeight:FontWeight.bold)
             ),
-               Padding(padding: const EdgeInsets.all(45), 
+               Padding(padding: const EdgeInsets.all(40), 
                child:Row(
                 children: [
+                ElevatedButton(onPressed: loadStudent, child: Text('Reset'), style: ElevatedButton.styleFrom(
+                  primary: Colors.red,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  )
+                ),),
+                Padding(padding: const EdgeInsets.all(11)),
                 DropdownButton<String>(
                     style: TextStyle(color: Colors.black),
-
                     items: <String>['Male', 'Female'].map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
                         child: Text(value, style: TextStyle(
                             color: Colors.black,
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600),
                         ),
                       );
@@ -103,63 +98,67 @@ class _HomePageState extends State<HomePage> {
                       "Gender",
                       style: TextStyle(
                           color: Colors.black,
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.w600),
                     ),
+                    dropdownColor: Colors.grey,
+                    icon: Icon(Icons.arrow_drop_down_circle),
+                    iconSize: 23,
+                    underline: SizedBox(),
                     onChanged: (String? value){
                        setState(() {
                         String? _chosenGender = value;
-                        _items = _items.where((val) => val["Gender"].contains(_chosenGender)).toList();
+                        student = student.where((val) => val["Gender"].contains(_chosenGender)).toList();
                       });
-                      
                     },
-                    
-            ),
-            DropdownButton<String>(
+                ),
+                Padding(padding: const EdgeInsets.all(11)),
+                DropdownButton<String>(
                     style: TextStyle(color: Colors.black),
-
                     items: <String>['Undergraduat', 'Graduate'].map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
                         child: Text(value, style: TextStyle(
                             color: Colors.black,
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600),
                         ),
                       );
                     }).toList(),
-                    hint: Text(
-                      "Staus",
+                    hint:Text(
+                      "Status",
                       style: TextStyle(
                           color: Colors.black,
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.w600),
                     ),
+                    dropdownColor: Colors.grey,
+                    icon: Icon(Icons.arrow_drop_down_circle),
+                    iconSize: 23,
+                    underline: SizedBox(),
+                    // isExpanded: true,
+                    
                     onChanged: (String? value){
                        setState(() {
                         String? _chosenStatus = value;
-                        //  readJson();
-                        _items = _items.where((val) => val["StudentStatus"].contains(_chosenStatus)).toList();
-                        
+                        student = student.where((val) => val["StudentStatus"].contains(_chosenStatus)).toList();
                       });
                     },
-            ),
+              ),
           ],
           ),
           ),
-           
-             Card(
-              
-              child:
-              DataTable(
-                  onSelectAll: (b){},
-                  sortAscending: isAscending,
-                  sortColumnIndex: sortColumnIndex,
-                  columnSpacing: (MediaQuery.of(context).size.width *0.005),
-                  dataRowHeight: 80,
-                  headingRowColor: MaterialStateColor.resolveWith((states) => Colors.black38),
-                  columns: [
-                    DataColumn(
+        Card(
+          child:
+          PaginatedDataTable(
+             onSelectAll: (b){},
+            sortAscending: isAscending,
+            sortColumnIndex: sortColumnIndex,
+            columnSpacing: (MediaQuery.of(context).size.width *0.1136),
+            source: MyData(),
+            header: Text('Student Table'),
+            columns: [
+              DataColumn(
                       numeric:false, 
                         label: Text('Id ' , style: TextStyle(fontSize: 15,fontStyle: FontStyle.italic, fontWeight:FontWeight.bold),),
                          onSort: (columnIndex , _){
@@ -167,43 +166,36 @@ class _HomePageState extends State<HomePage> {
                             sortColumnIndex = columnIndex;
                             if(isAscending == true){
                               isAscending = false;
-                              _items.sort((a,b) => a["ID"].compareTo(b["ID"]));
-
+                              student.sort((a,b) => a["ID"].compareTo(b["ID"]));
                             }else{
                               isAscending = true;
-                            _items.sort((a,b) => b["ID"].compareTo(a["ID"]));
-
+                              student.sort((a,b) => b["ID"].compareTo(a["ID"]));
                             }
-                            
                           }
                         );
-                          
                         },
                         ),
-                    
                     DataColumn(
                       numeric:false,
-                        label: Text('Gender ', style: TextStyle(fontSize: 15,fontStyle: FontStyle.italic,fontWeight:FontWeight.bold),),
+                      label: Text('Gender ', style: TextStyle(fontSize: 15,fontStyle: FontStyle.italic,fontWeight:FontWeight.bold),),
                         ),
                     DataColumn(
                       numeric:false,
-                        label: Text('Status', style: TextStyle( fontSize: 15, fontStyle: FontStyle.italic,fontWeight:FontWeight.bold),),
+                      label: Text('Status', style: TextStyle( fontSize: 15, fontStyle: FontStyle.italic,fontWeight:FontWeight.bold),),
                         ),
-                    
                     DataColumn(
                       numeric:false,
-                        label: Text('Age', style: TextStyle(fontSize: 15,fontStyle: FontStyle.italic,fontWeight:FontWeight.bold)),
+                      label: Text('Age', style: TextStyle(fontSize: 15,fontStyle: FontStyle.italic,fontWeight:FontWeight.bold)),
                         
                          onSort: (columnIndex , _){
                           setState(() {
                             sortColumnIndex = columnIndex;
                             if(isAscending == true){
                               isAscending = false;
-                              _items.sort((a,b) => a["Age"].compareTo(b["Age"]));
-
+                              student.sort((a,b) => a["Age"].compareTo(b["Age"]));
                             }else{
                               isAscending = true;
-                            _items.sort((a,b) => b["Age"].compareTo(a["Age"]));
+                            student.sort((a,b) => b["Age"].compareTo(a["Age"]));
 
                             }
                             
@@ -211,90 +203,53 @@ class _HomePageState extends State<HomePage> {
                           
                         },
                         ),
-                    
-                  ],
-                  // rowsPerPage: 8,
-
-                  rows: _items.map<DataRow>(((val) => 
-                    
-                      DataRow(
-                        cells: [
-                          DataCell(
-                              Container(
-                                color: Colors.white30,
-                                width: (MediaQuery.of(context).size.width * 0.07) ,
-                                child:
-                                Text(val["ID"], style: TextStyle(fontSize:  MediaQuery.of(context).size.width >500 ?15 : MediaQuery.of(context).size.width <375? 11 :13, fontWeight: FontWeight.w900),)
-                            )
-                            ),
-                          
-                          DataCell(Container(
-                            
-                            width: (MediaQuery.of(context).size.width * 0.22) ,
-                             child:
-                            Text(val["Gender"], style: TextStyle(fontSize:  MediaQuery.of(context).size.width >500 ?15 : MediaQuery.of(context).size.width <375? 11 :13, fontWeight: FontWeight.w900),)
-                          )),
-                          DataCell(Container(
-                          width: (MediaQuery.of(context).size.width * 0.22) ,
-                             child:
-                            Text(val["StudentStatus"], style: TextStyle(fontSize:  MediaQuery.of(context).size.width >500 ?15 : MediaQuery.of(context).size.width <375? 11 :13, fontWeight: FontWeight.w900),)
-                          )),
-                         
-                          DataCell(Container(width: (MediaQuery.of(context).size.width * 0.22 ) ,
-                             child:
-                            Text(val["Age"], style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900),)
-                          )),
-                         
-                        ],
-                      )
-                      ),
-                      )
-                      .toList()
-                ),
-                elevation: 10,
-             )
-               
-                
-          
-          ],
+            ],  
+            
+            horizontalMargin: 10,
+            showCheckboxColumn: false,
+            rowsPerPage:5,
+          )
         ),
-        
+           ]
+           )
+        ),
+        ),
       ),
-        
-        )
-        )
-        ) 
     );
   }
 }
-class MyDataTableSource extends DataTableSource{
-  MyDataTableSource(this.items);
-  final List items;
 
+class MyData extends DataTableSource{
+  
+  final List data = _MyHomePageState.student;
+  // print(data);
   @override 
-  DataRow getRow(int index)=> DataRow.byIndex(
+  DataRow getRow(int index)
+  {
+    return DataRow.byIndex(
       index: index,
       cells:[
-        DataCell(Text('${items[index]['ID']}')),
-        DataCell(Text('${items[index]['Gender']}',style: TextStyle(fontSize:13, fontWeight: FontWeight.w900),)),
-        DataCell(Text('${items[index]['StudentStatus']}',style: TextStyle(fontSize:13, fontWeight: FontWeight.w900),)),
-        DataCell(Text('${items[index]['Age']}',style: TextStyle(fontSize:13, fontWeight: FontWeight.w900),))
-      ],
+        DataCell(Text('${data[index]['ID']}'.toString())),
+        DataCell(Text('${data[index]['Gender']}',style: TextStyle(fontSize:13, fontWeight: FontWeight.w900),)),
+        DataCell(Text('${data[index]['StudentStatus']}',style: TextStyle(fontSize:13, fontWeight: FontWeight.w900),)),
+        DataCell(Text('${data[index]['Age']}'.toString(),style: TextStyle(fontSize:13, fontWeight: FontWeight.w900),))
+      ]
     );
-  
+
+  }
 
   @override 
   int get selectedRowCount{
     return 0;
   }
-  
+
   @override 
-  bool get isRwoCountApproximate {
+  bool get isRowCountApproximate {
     return false ;
   }
-                
+
   @override 
   int get rowCount {
-    return items.length;
+    return data.length;
   }
 }
